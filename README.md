@@ -46,11 +46,19 @@ Deteksi-Ekspresi-Wajah/
 2. Model MobileNetV2 memprediksi probabilitas 3 kelas (Bingung, Lelah, Mengerti).
 3. Kelas dengan probabilitas tertinggi ditampilkan beserta confidence dan rekomendasi status.
 
-## Dataset
-<!-- ISI: sumber & jumlah citra dataset ekspresi belajar yang dipakai untuk melatih model -->
+## Dataset & Pelatihan
+Model dilatih untuk mengenali **3 kelas ekspresi belajar**: Bingung, Lelah, dan Mengerti,
+dari citra wajah. Arsitektur menggunakan **transfer learning MobileNetV2** dengan ukuran
+input 224×224 dan normalisasi piksel (pembagian 255). Bobot hasil pelatihan disimpan pada
+`model_cnn_tubes.h5` dan dimuat langsung oleh aplikasi untuk inferensi.
 
 ## Hasil
-<!-- ISI: akurasi model pada data uji, mis. 85%. Tambahkan screenshot aplikasi jika ada -->
+- Aplikasi memberikan **prediksi kelas** beserta **confidence score** dan **distribusi
+  probabilitas** ketiga kelas secara langsung dari foto yang diunggah.
+- Setiap prediksi diterjemahkan menjadi rekomendasi tindakan (Siap Belajar / Butuh
+  Istirahat / Butuh Penjelasan Ulang) agar hasil model mudah dipahami pengguna non-teknis.
+
+> Catatan: metrik akurasi & screenshot antarmuka dapat ditambahkan di sini bila tersedia.
 
 ## Author
 **Sofyan Fauzi Dzaki Arif** — [github.com/mine2710](https://github.com/mine2710)
