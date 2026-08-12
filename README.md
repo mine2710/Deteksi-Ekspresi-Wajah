@@ -36,8 +36,10 @@ Aplikasi akan terbuka di browser (default: http://localhost:8501).
 ```
 Deteksi-Ekspresi-Wajah/
 ├── app.py               # Aplikasi Streamlit + logika inferensi
-├── model_cnn_tubes.h5   # Model CNN (MobileNetV2) terlatih
+├── train_model.py       # Skrip augmentasi + pelatihan CNN (MobileNetV2)
+├── model_cnn_tubes.h5   # Model CNN terlatih
 ├── requirements.txt     # Dependency (streamlit, tensorflow-cpu, numpy, Pillow)
+├── images/              # Confusion matrix hasil evaluasi
 └── README.md
 ```
 
@@ -47,18 +49,38 @@ Deteksi-Ekspresi-Wajah/
 3. Kelas dengan probabilitas tertinggi ditampilkan beserta confidence dan rekomendasi status.
 
 ## Dataset & Pelatihan
-Model dilatih untuk mengenali **3 kelas ekspresi belajar**: Bingung, Lelah, dan Mengerti,
-dari citra wajah. Arsitektur menggunakan **transfer learning MobileNetV2** dengan ukuran
-input 224×224 dan normalisasi piksel (pembagian 255). Bobot hasil pelatihan disimpan pada
-`model_cnn_tubes.h5` dan dimuat langsung oleh aplikasi untuk inferensi.
+- **Dataset:** 68 citra wajah primer (dikumpulkan sendiri) dalam 3 kelas —
+  Bingung (21), Lelah/Ngantuk (25), Mengerti/Paham (22).
+- **Augmentasi data:** tiap gambar diperbanyak ~5× (rotasi, shift, shear, zoom, flip
+  horizontal) menggunakan `ImageDataGenerator` untuk memperbesar variasi data latih.
+- **Arsitektur (transfer learning):**
+  `MobileNetV2` (bobot ImageNet, base dibekukan) → `GlobalAveragePooling2D`
+  → `Dense(128, ReLU)` → `Dropout(0.2)` → `Dense(3, Softmax)`.
+- **Konfigurasi:** input 224×224, normalisasi `1/255`, optimizer Adam (lr=0.0001),
+  loss `categorical_crossentropy`, 20 epoch, split latih/validasi 80/20.
+- Skrip pelatihan lengkap: `tugas_besar_deep_learning_cnn.py`.
 
-## Hasil
-- Aplikasi memberikan **prediksi kelas** beserta **confidence score** dan **distribusi
-  probabilitas** ketiga kelas secara langsung dari foto yang diunggah.
-- Setiap prediksi diterjemahkan menjadi rekomendasi tindakan (Siap Belajar / Butuh
-  Istirahat / Butuh Penjelasan Ulang) agar hasil model mudah dipahami pengguna non-teknis.
+## Hasil Evaluasi
+Model dievaluasi ulang pada **68 citra dataset asli** (tanpa augmentasi):
 
-> Catatan: metrik akurasi & screenshot antarmuka dapat ditambahkan di sini bila tersedia.
+- **Akurasi keseluruhan: 61,8%** (42 dari 68 benar).
+
+| Kelas | Precision | Recall | F1-score |
+|---|---:|---:|---:|
+| Bingung | 0.47 | 1.00 | 0.64 |
+| Lelah | 1.00 | 0.44 | 0.61 |
+| Mengerti | 0.83 | 0.46 | 0.59 |
+
+![Confusion Matrix](images/confusion-matrix.png)
+
+**Analisis jujur:** model mengenali "Bingung" dengan sangat baik (recall 100%) namun
+cenderung salah mengklasifikasikan sebagian "Lelah" dan "Mengerti" sebagai "Bingung".
+Akurasi moderat ini wajar mengingat **dataset sangat kecil (68 gambar)** dan variasi
+pencahayaan/pose terbatas. Peluang perbaikan: menambah jumlah & keberagaman data,
+fine-tuning sebagian layer MobileNetV2, serta class balancing.
+
+> Aplikasi Streamlit tetap menampilkan **confidence score** dan **distribusi probabilitas**
+> tiap kelas untuk transparansi prediksi ke pengguna.
 
 ## Author
 **Sofyan Fauzi Dzaki Arif** — [github.com/mine2710](https://github.com/mine2710)
